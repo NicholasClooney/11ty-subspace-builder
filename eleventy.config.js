@@ -1,5 +1,7 @@
 // 11ty Nav
 import eleventyNavigationPlugin from "@11ty/eleventy-navigation";
+// 11ty Img
+import { eleventyImageTransformPlugin } from "@11ty/eleventy-img";
 
 // Bake our own Markdown anchors
 import MarkdownIt from "markdown-it";
@@ -33,6 +35,23 @@ export default function (eleventyConfig) {
 	eleventyConfig.addDataExtension("yaml", (contents) => yaml.load(contents));
 
 	eleventyConfig.addPlugin(eleventyNavigationPlugin);
+	eleventyConfig.addPlugin(eleventyImageTransformPlugin, {
+		// output image formats
+		formats: ["avif", "webp", "jpeg"],
+
+		// output image widths
+		widths: [300, 600, 1200],
+
+		// optional, attributes assigned on <img> nodes override these values
+		htmlOptions: {
+			imgAttributes: {
+				loading: "lazy",
+				decoding: "async",
+				sizes: "(width < 30em) 100vw, (30em <= width < 50em) 30em, (width >= 50em) 50em"
+			},
+			pictureAttributes: {}
+		},
+	});
 
 	// Tell 11ty to use our custom Markdown-it
 	eleventyConfig.setLibrary("md", md);
