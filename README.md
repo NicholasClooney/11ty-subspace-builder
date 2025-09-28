@@ -7,6 +7,7 @@ A warp-speed Eleventy blog starter powered by Tachyons utility classes. It ships
 - Tachyons-based, theme-aware typography and color palettes with preview buttons
 - Recursive Eleventy Navigation sidebar with responsive hamburger toggle
 - Reusable post list macro that trims excerpts and formats dates
+- Responsive image pipeline powered by `@11ty/eleventy-img` (see [Responsive Images with Eleventy Img](posts/responsive-images-eleventy-img.md))
 - YAML-driven site metadata, theme presets, and animation timing controls
 
 ## Quick Start
@@ -43,7 +44,7 @@ The static output is written to the `_site/` directory. Deploy those files to an
 - `_includes/layouts/` - Base and page layouts, including the responsive navigation + theme selector UI in `home.njk`.
 - `_includes/components/` - Shareable Nunjucks macros like `post-list.njk` for rendering excerpts.
 - `posts/` - Blog posts and collection defaults (`posts.json` assigns the home layout to the collection).
-- `eleventy.config.js` - Eleventy configuration, Markdown-it setup, and custom filters (`readableDate`, `machineDate`, `excerpt`).
+- `eleventy.config.js` - Eleventy configuration, Markdown-it setup, the Eleventy Img transform, and custom filters (`readableDate`, `machineDate`, `excerpt`).
 - `index.md` - Home page content that also uses the `home` layout.
 
 ## Configuration
