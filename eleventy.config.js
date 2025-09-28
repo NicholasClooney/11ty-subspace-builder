@@ -36,20 +36,15 @@ export default function (eleventyConfig) {
 
 	eleventyConfig.addPlugin(eleventyNavigationPlugin);
 	eleventyConfig.addPlugin(eleventyImageTransformPlugin, {
-		// output image formats
 		formats: ["avif", "webp", "jpeg"],
-
-		// output image widths
-		widths: [300, 600, 1200],
-
-		// optional, attributes assigned on <img> nodes override these values
+		widths: [320, 640, 960, 1280],
 		htmlOptions: {
 			imgAttributes: {
 				loading: "lazy",
 				decoding: "async",
-				sizes: "(width < 30em) 100vw, (30em <= width < 50em) 30em, (width >= 50em) 50em"
+				sizes: "(width <= 30em) 100vw, 75vw",
 			},
-			pictureAttributes: {}
+			pictureAttributes: {},
 		},
 	});
 

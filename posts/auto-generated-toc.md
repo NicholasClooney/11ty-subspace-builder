@@ -7,10 +7,12 @@ excerpt: |
   Adding Markdown-driven tables of contents means fewer manual edits, consistent anchors, and faster publishing all around.
 ---
 
-[[toc]]
-
 ## Why I Care About Tables of Contents
 TOCs act as a quick schematic for each post. They give readers an immediate sense of the terrain and let them jump to the section they want without scrolling forever. When you are writing walkthroughs, release notes, or deep dives (which is most of what I do here), that high-level map keeps people oriented.
+
+## Table of Contents
+
+[[toc]]
 
 ## The Pain: Manual ChatGPT TOCs
 Before today I would pop each draft into ChatGPT in the browser, ask it for a Markdown TOC, and paste the result back into the post. It was fine until it was not. The assistant occasionally slugified headings differently than our site expects, which meant the generated links pointed nowhere. Fixing those mismatches added tedious editing rounds that made me question whether a TOC was worth the effort.

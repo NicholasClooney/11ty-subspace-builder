@@ -9,7 +9,16 @@ excerpt: |
 
 ## The problem we started with
 
-A reader pinged us because screenshots on small screens looked squashed, even though the assets themselves were crisp. The culprit was a pair of Markdown `<img>` tags that hard-coded only a `height="300"`. Tachyons dutifully set the width to `100%` on narrow viewports, so the browser stretched the bitmaps vertically to reach 300 pixels tall. No amount of `object-fit` sugar coats that mismatch.
+I noticed screenshots on small screens looked squashed, even though the assets themselves were crisp. It looked like that...
+
+<img
+  alt= "Mobile Screenshot of Stretched Images"
+  src="/assets/mobile-screenshot-stretched-image.jpeg"
+  eleventy:widths="240"
+  eleventy:sizes="240px"
+/>
+
+The Markdown posts used plain `<img>` tags that only specified `height="300"`. When the layout narrowed, the browser shrank the width to fit the column (Tachyons’ default `img { max-width: 100%; }` behaviour), but the *attribute-defined* height remained locked at 300 pixels. Browsers treat explicit HTML attributes as higher priority than the CSS fallback, so the bitmap was stretched vertically to honour that fixed height. Remove the hard-coded height and the distortion disappears.
 
 We wanted a solution that would:
 
@@ -18,6 +27,10 @@ We wanted a solution that would:
 - Lay the groundwork for modern formats like WebP or AVIF without hand-rolling `<picture>` markup
 
 Enter Eleventy Img.
+
+## Table of Contents
+
+[[toc]]
 
 ## Why reach for `@11ty/eleventy-img`
 
@@ -29,13 +42,17 @@ The plugin gives you production-ready responsive images with very little ceremon
 - Emits correct markup—`<picture>`, `srcset`, `sizes`, plus width/height—to preserve intrinsic ratios and reduce layout shift
 - Future-proofs the site: flipping on new formats is as simple as adding another entry to the formats array
 
-## Shortcode vs. transform plugin
+## How we wired Eleventy Img
 
-Our first pass added a Nunjucks {% raw %} `{% image %}` {% endraw %} shortcode that wrapped `eleventy-img` with sensible defaults (`widths: [320, 640, 960, 1280, 1600]`, `formats: ["webp", "jpeg"]`). Posts just had to swap `<img>` for {% raw %} `{% image %}` {% endraw %} and pass real alt text. Eleventy generated `/assets/generated/*` derivatives and dropped responsive markup straight into the page.
+We initially replaced the Markdown `<img>` tags with a `{% raw %}{% image %}{% endraw %}` shortcode. That worked, but it required authors to remember a custom tag every time they dropped in a screenshot. The better fit for this project turned out to be Eleventy Img’s HTML transform plugin.
 
-Later we experimented with Eleventy Img’s transform plugin, which rewrites plain `<img>` tags in HTML. The defaults colocate derivatives under `/img/` in `_site` and add a responsive `<picture>` wrapper on the fly. That is handy when authors forget to use the shortcode, but you still pay attention to the output widths so the browser does not fetch unnecessarily large files.
+The transform plugin scans rendered HTML, finds every `<img>`, and rewrites it into a fully fledged `<picture>` element. Our config (`eleventy.config.js`) sets:
 
-Either approach hinges on one core idea: your templates describe _how the image will be sized_, and Eleventy materialises the right derivatives.
+- `formats: ["avif", "webp", "jpeg"]` so modern browsers get lean files first
+- `widths: [320, 640, 960, 1280]` to cover half-, 1×, and 2× representations of our column
+- `htmlOptions.imgAttributes` with `loading="lazy"`, `decoding="async"`, and a `sizes` string that mirrors the layout (`(width <= 30em) 100vw, 75vw`)—full width on phones, roughly 75% of the viewport once Tachyons’ `-ns` breakpoint kicks in
+
+During local development Eleventy serves derivatives from the on-demand `/.11ty/image/` endpoint; production builds write the final files to `_site/img/`. Because the transform runs after Markdown renders, content authors can keep writing plain HTML or Markdown images and still benefit from the responsive markup.
 
 ## How responsive image markup works
 
@@ -62,44 +79,36 @@ The newer range syntax swaps `max-width` for math-like comparisons. Using `em` t
 
 ### Picking the right widths
 
-Once you know the maximum rendered width, generate a few useful derivatives. A simple rule of thumb is 0.5×, 1×, and 2× of that max. With a 600px slot you might produce `[300, 600, 1200]`. Eleventy Img automatically drops any size larger than the source asset, so you can include generous options without worrying about blurry upscales.
+Once you know the maximum rendered width, generate a few useful derivatives. A simple rule of thumb is 0.5×, 1×, and 2× of that max. With a column that settles around 640px, we produce `[320, 640, 960, 1280]`. Eleventy Img automatically drops any size larger than the source asset, so you can include generous options without worrying about blurry upscales.
 
 When those widths land in `srcset`, the browser chooses the smallest file that still looks sharp for the current device pixel ratio and viewport width. Combined with a good `sizes` string, users download dramatically less data on phones while retina displays still get a crisp result.
 
 ## Guardrails that kept aspect ratios honest
 
 - Always pass real alt text—Eleventy Img will throw if you forget, which saves you from shipping broken accessibility.
-- Leave `width` and `height` attributes in the generated markup. They’re calculated from the derivative that Eleventy selects as the fallback and prevent layout jank.
+- Leave the generated `width` and `height` attributes alone; they describe the intrinsic dimensions of the largest derivative so the browser can reserve layout space.
 - If a post needs art direction (say, a square crop on mobile), reach for the shortcode so you can specify per-breakpoint sources inside a `<picture>` block. The transform plugin is great for defaults but blunt for those edge cases.
+- We added a tiny CSS override (`img { height: auto; }`) so the transform’s explicit height never overrides our responsive layout when images shrink on narrow columns.
 
 ## Where we landed
 
-Our Markdown now reads:
+Markdown posts still contain a simple HTML image:
 
-{% raw %}
-```nunjucks
-{% image "/assets/social-cards.png", "Example social card generated by the Subspace Builder" %}
+```html
+<img alt="Example social card generated by the Subspace Builder" src="/assets/social-cards.png" />
 ```
-{% endraw %}
 
-Eleventy handles the rest, emitting markup like:
+After the transform plugin runs, Eleventy emits (dev server excerpt shown):
 
 ```html
 <picture>
-  <source type="image/webp" srcset="/img/9NWum2aR9G-320.webp 320w, …">
-  <img
-    alt="Example social card generated by the Subspace Builder"
-    src="/img/9NWum2aR9G-640.jpeg"
-    width="640"
-    height="336"
-    sizes="(min-width: 48em) 50vw, 100vw"
-    loading="lazy"
-    decoding="async"
-  />
+  <source type="image/avif" srcset="/img/9NWum2aR9G-320.avif 320w, /img/9NWum2aR9G-640.avif 640w, /img/9NWum2aR9G-960.avif 960w" sizes="(width <= 30em) 100vw, 75vw">
+  <source type="image/webp" srcset="/img/9NWum2aR9G-320.webp 320w, /img/9NWum2aR9G-640.webp 640w, /img/9NWum2aR9G-960.webp 960w" sizes="(width <= 30em) 100vw, 75vw">
+  <img loading="lazy" decoding="async" alt="Example social card generated by the Subspace Builder" src="/img/9NWum2aR9G-320.jpeg" width="960" height="504" srcset="/img/9NWum2aR9G-320.jpeg 320w, /img/9NWum2aR9G-640.jpeg 640w, /img/9NWum2aR9G-960.jpeg 960w" sizes="(width <= 30em) 100vw, 75vw">
 </picture>
 ```
 
-No more stretched screenshots, and the HTML now communicates everything the browser needs to take the optimal path. From here we can tune `sizes`, add AVIF, or teach the transform plugin to recognise hero images versus inline thumbnails.
+Eleventy dropped the 1280px derivative because the source PNG tops out at 1200px wide, which is exactly what we want. Between the transform and the CSS guardrail, the screenshots hold their aspect ratios and download an appropriately sized file on every viewport.
 
 ## Recommended reading
 
