@@ -11,4 +11,11 @@
 	html.theme .theme-midtone {
 		transition: color {{ transitionDuration }} {{ transitionTimingFunction }};
 	}
+	/*
+		Eleventy Img transform adds width/height attrs;
+		Reset the height so images stay proportional at narrow widths
+	*/
+	img {
+		height: auto;
+	}
 </style>
