@@ -163,7 +163,7 @@ export default function (eleventyConfig) {
     return path;
   };
 
-  eleventyConfig.addDataExtension('yaml', (contents) => yaml.load(contents));
+	eleventyConfig.addDataExtension("yaml", (contents) => yaml.load(contents));
 
   eleventyConfig.addGlobalData(
     "environment",
@@ -174,6 +174,7 @@ export default function (eleventyConfig) {
       return data.draft && process.env.ELEVENTY_ENV === 'production';
     },
   });
+
 	eleventyConfig.addPlugin(eleventyNavigationPlugin);
 	eleventyConfig.addPlugin(eleventyImageTransformPlugin, {
 		formats: ["avif", "webp", "jpeg"],
