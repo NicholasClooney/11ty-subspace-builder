@@ -46,7 +46,9 @@
 	{% include "layouts/partials/head-seo.njk" %}
 	{% include "layouts/partials/theme-styles.njk" %}
 
-	{% include "layouts/partials/analytics-tracking-script.njk" %}
+	{% if environment != 'development' %}
+		{% include "layouts/partials/analytics-tracking-script.njk" %}
+	{% endif %}
 
 </head>
 <body>
