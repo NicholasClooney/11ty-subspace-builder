@@ -2,6 +2,9 @@
 import eleventyNavigationPlugin from "@11ty/eleventy-navigation";
 // 11ty Img
 import { eleventyImageTransformPlugin } from "@11ty/eleventy-img";
+import EleventyFetch from "@11ty/eleventy-fetch";
+import hljs from "highlight.js";
+import path from "node:path";
 
 // Bake our own Markdown anchors
 import MarkdownIt from "markdown-it";
@@ -12,6 +15,64 @@ import yaml from "js-yaml";
 import excerpt from "./lib/excerpt.js";
 
 const OG_FORCE_ENV = process.env.OG_FORCE === "true";
+
+const parseBlobUrl = (githubBlobUrl) => {
+	const url = new URL(githubBlobUrl);
+	const parts = url.pathname.split("/").filter(Boolean);
+	if (parts[2] !== "blob") throw new Error("URL must be a GitHub blob URL");
+	const [user, repo, , branch, ...fileParts] = parts;
+	const filePath = fileParts.join("/");
+	const rangeHash = (url.hash || "").replace(/^#/, "");
+	let start = null;
+	let end = null;
+	if (rangeHash.startsWith("L")) {
+		const [first, last] = rangeHash.split("-").map((part) => part.replace(/^L/, ""));
+		start = parseInt(first, 10);
+		end = last ? parseInt(last, 10) : start;
+	}
+	const raw = `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${filePath}`;
+	return { user, repo, branch, filePath, raw, web: githubBlobUrl, start, end };
+};
+
+const escapeHtml = (value) =>
+	value
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;");
+
+const guessLanguageByExt = (filePath) => {
+	const ext = path.extname(filePath).toLowerCase().replace(".", "");
+	const map = {
+		js: "javascript",
+		mjs: "javascript",
+		cjs: "javascript",
+		ts: "typescript",
+		tsx: "tsx",
+		jsx: "jsx",
+		json: "json",
+		yml: "yaml",
+		yaml: "yaml",
+		sh: "bash",
+		zsh: "bash",
+		bash: "bash",
+		swift: "swift",
+		py: "python",
+		rb: "ruby",
+		go: "go",
+		rs: "rust",
+		php: "php",
+		java: "java",
+		kt: "kotlin",
+		css: "css",
+		scss: "scss",
+		html: "xml",
+		xml: "xml",
+		md: "markdown",
+		txt: "plaintext",
+	};
+	return map[ext] || "plaintext";
+};
 
 const slugify = (value) =>
 	encodeURIComponent(String(value).trim().toLowerCase().replace(/\s+/g, "-"));
@@ -87,6 +148,55 @@ export default function (eleventyConfig) {
 
 	// Copy static assets straight through to the build output
 	eleventyConfig.addPassthroughCopy("assets");
+
+	eleventyConfig.addAsyncShortcode(
+		"github",
+		async function (url, style = "light") {
+			const meta = parseBlobUrl(url);
+
+			const fetched = await EleventyFetch(meta.raw, { duration: "1d", type: "text" });
+			const source = typeof fetched === "string" ? fetched : String(fetched);
+
+			let code = source;
+			if (meta.start && meta.end) {
+				const lines = source.split("\n");
+				code = lines.slice(meta.start - 1, meta.end).join("\n");
+			}
+
+			const language = guessLanguageByExt(meta.filePath);
+			let highlighted;
+			try {
+				highlighted = hljs.highlight(code, { language }).value;
+			} catch {
+				highlighted = escapeHtml(code);
+			}
+
+			const numbered = highlighted
+				.split("\n")
+				.map((line, index) => {
+					const content = line.trim().length ? line : " ";
+					const lineNumber = (meta.start || 1) + index;
+					return `<li value="${lineNumber}"><code>${content}</code></li>`;
+				})
+				.join("\n");
+
+			const theme = style || "light";
+
+			return `
+<div class="gh-embed gh-embed--${theme}">
+	<div class="gh-embed__meta">
+		<a class="gh-embed__file" href="${meta.web}" target="_blank" rel="noopener noreferrer">
+			${meta.filePath}
+		</a>
+		<a class="gh-embed__raw" href="${meta.raw}" target="_blank" rel="noopener noreferrer">view raw</a>
+		<button class="gh-embed__copy" data-clipboard>Copy</button>
+	</div>
+	<pre class="gh-embed__pre hljs">
+		<ol class="gh-embed__ol">${numbered}</ol>
+	</pre>
+</div>`;
+		}
+	);
 
 	eleventyConfig.addFilter("readableDate", (dateValue, locale = "en-US") => {
 		if (!dateValue) return "";

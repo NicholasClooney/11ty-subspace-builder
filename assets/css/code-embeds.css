@@ -1,0 +1,79 @@
+.gh-embed {
+  border: 1px solid var(--gh-border, #d0d7de);
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 1.25rem 0;
+  background: var(--gh-bg, #fff);
+}
+.gh-embed--dark {
+  --gh-bg: #0d1117;
+  --gh-fg: #c9d1d9;
+  --gh-border: #30363d;
+  --gh-meta-bg: #161b22;
+  --gh-link: #58a6ff;
+  color: var(--gh-fg);
+}
+.gh-embed--light {
+  --gh-bg: #fff;
+  --gh-fg: #24292f;
+  --gh-border: #d0d7de;
+  --gh-meta-bg: #f6f8fa;
+  --gh-link: #0969da;
+  color: var(--gh-fg);
+}
+
+.gh-embed__meta {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background: var(--gh-meta-bg);
+  font: 12px/1.4 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  border-bottom: 1px solid var(--gh-border);
+}
+.gh-embed__meta a {
+  color: var(--gh-link);
+  text-decoration: none;
+}
+.gh-embed__file {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gh-embed__raw {
+  margin-left: auto;
+}
+
+.gh-embed__copy {
+  margin-left: 0.75rem;
+  border: 1px solid var(--gh-border);
+  background: transparent;
+  color: inherit;
+  font: 12px/1 monospace;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.gh-embed__pre {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  overflow-x: auto;
+}
+.gh-embed__ol {
+  list-style: decimal;
+  margin: 0;
+  padding-left: 2.5rem;
+  white-space: pre;
+}
+.gh-embed__ol > li {
+  line-height: 1.4;
+}
+.gh-embed__ol > li > code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  background: none;
+  padding: 0;
+}

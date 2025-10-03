@@ -26,10 +26,12 @@
     "slugify": "^1.6.6"
   },
   "devDependencies": {
+    "@11ty/eleventy-fetch": "^5.1.0",
     "@fontsource/inter": "^5.0.18",
     "@fontsource/lexend": "^5.0.18",
     "@resvg/resvg-js": "^2.6.0",
     "gray-matter": "^4.0.3",
+    "highlight.js": "^11.11.1",
     "satori": "^0.10.14",
     "satori-html": "^0.3.2"
   }
