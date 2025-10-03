@@ -1,79 +1,132 @@
 .gh-embed {
-  border: 1px solid var(--gh-border, #d0d7de);
+  --gh-bg: #fff;
+  --gh-fg: #24292f;
+  --gh-border: #d0d7de;
+  --gh-meta-bg: #f6f8fa;
+  --gh-link: #0969da;
+  --gh-line-number: #57606a;
+  --gh-code-bg: #f6f8fa;
+  border: 1px solid var(--gh-border);
   border-radius: 6px;
   overflow: hidden;
   margin: 1.25rem 0;
-  background: var(--gh-bg, #fff);
+  background: var(--gh-bg);
+  color: var(--gh-fg);
+  box-shadow: 0 1px 0 rgba(27, 31, 36, 0.04);
+  font: 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 }
+
 .gh-embed--dark {
   --gh-bg: #0d1117;
   --gh-fg: #c9d1d9;
   --gh-border: #30363d;
   --gh-meta-bg: #161b22;
   --gh-link: #58a6ff;
-  color: var(--gh-fg);
-}
-.gh-embed--light {
-  --gh-bg: #fff;
-  --gh-fg: #24292f;
-  --gh-border: #d0d7de;
-  --gh-meta-bg: #f6f8fa;
-  --gh-link: #0969da;
-  color: var(--gh-fg);
+  --gh-line-number: #8b949e;
+  --gh-code-bg: #0d1117;
+  box-shadow: 0 0 0 1px rgba(240, 246, 252, 0.04);
 }
 
 .gh-embed__meta {
   display: flex;
-  gap: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
   align-items: center;
-  justify-content: space-between;
   padding: 0.5rem 0.75rem;
   background: var(--gh-meta-bg);
   font: 12px/1.4 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
   border-bottom: 1px solid var(--gh-border);
 }
+
 .gh-embed__meta a {
   color: var(--gh-link);
   text-decoration: none;
 }
+
+.gh-embed__meta a:hover,
+.gh-embed__meta a:focus {
+  text-decoration: underline;
+}
+
 .gh-embed__file {
   font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
 }
-.gh-embed__raw {
+
+.gh-embed__actions {
   margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .gh-embed__copy {
-  margin-left: 0.75rem;
   border: 1px solid var(--gh-border);
-  background: transparent;
+  background: rgba(175, 184, 193, 0.12);
   color: inherit;
-  font: 12px/1 monospace;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  font: 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.gh-embed__copy:hover,
+.gh-embed__copy:focus {
+  background: rgba(175, 184, 193, 0.24);
+  border-color: rgba(27, 31, 36, 0.2);
+}
+
+.gh-embed--dark .gh-embed__copy {
+  background: rgba(110, 118, 129, 0.12);
+  border-color: rgba(110, 118, 129, 0.4);
+}
+
+.gh-embed--dark .gh-embed__copy:hover,
+.gh-embed--dark .gh-embed__copy:focus {
+  background: rgba(110, 118, 129, 0.24);
+  border-color: rgba(240, 246, 252, 0.3);
 }
 
 .gh-embed__pre {
   margin: 0;
-  padding: 0.5rem 0.75rem;
-  overflow-x: auto;
+  padding: 0.5rem 0;
+  overflow: auto;
+  background: var(--gh-code-bg);
 }
+
 .gh-embed__ol {
-  list-style: decimal;
   margin: 0;
-  padding-left: 2.5rem;
-  white-space: pre;
-}
-.gh-embed__ol > li {
-  line-height: 1.4;
-}
-.gh-embed__ol > li > code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-  font-size: 12px;
-  background: none;
   padding: 0;
+  list-style: none;
+  min-width: 100%;
+  color: inherit;
+}
+
+.gh-embed__ol > li {
+  display: grid;
+  grid-template-columns: 2.4rem minmax(0, 1fr);
+  column-gap: 0.6rem;
+  align-items: stretch;
+  padding: 0.05rem 0.9rem 0.05rem 0.6rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.gh-embed__ol > li::before {
+  content: attr(value);
+  text-align: right;
+  color: var(--gh-line-number);
+  padding-right: 0.2rem;
+  user-select: none;
+}
+
+.gh-embed__ol > li > code {
+  display: block;
+  white-space: pre;
+  color: inherit;
 }

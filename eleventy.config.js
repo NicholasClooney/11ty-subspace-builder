@@ -164,6 +164,7 @@ export default function (eleventyConfig) {
 			}
 
 			const language = guessLanguageByExt(meta.filePath);
+			const normalizedLanguage = typeof language === "string" ? language.toLowerCase().replace(/[^a-z0-9-]+/g, "") : "";
 			let highlighted;
 			try {
 				highlighted = hljs.highlight(code, { language }).value;
@@ -176,11 +177,13 @@ export default function (eleventyConfig) {
 				.map((line, index) => {
 					const content = line.trim().length ? line : " ";
 					const lineNumber = (meta.start || 1) + index;
-					return `<li value="${lineNumber}"><code>${content}</code></li>`;
+					const languageAttr = normalizedLanguage ? ` class="language-${normalizedLanguage}"` : "";
+					return `<li value="${lineNumber}"><code${languageAttr}>${content}</code></li>`;
 				})
 				.join("\n");
 
 			const theme = style || "light";
+			const languageClass = normalizedLanguage ? ` language-${normalizedLanguage}` : "";
 
 			return `
 <div class="gh-embed gh-embed--${theme}">
@@ -188,15 +191,17 @@ export default function (eleventyConfig) {
 		<a class="gh-embed__file" href="${meta.web}" target="_blank" rel="noopener noreferrer">
 			${meta.filePath}
 		</a>
-		<a class="gh-embed__raw" href="${meta.raw}" target="_blank" rel="noopener noreferrer">view raw</a>
-		<button class="gh-embed__copy" data-clipboard>Copy</button>
+		<div class="gh-embed__actions">
+			<a class="gh-embed__raw" href="${meta.raw}" target="_blank" rel="noopener noreferrer">view raw</a>
+			<button class="gh-embed__copy" data-clipboard>Copy</button>
+		</div>
 	</div>
-	<pre class="gh-embed__pre hljs">
+	<pre class="gh-embed__pre hljs${languageClass}">
 		<ol class="gh-embed__ol">${numbered}</ol>
 	</pre>
 </div>`;
-		}
-	);
+			}
+		);
 
 	eleventyConfig.addFilter("readableDate", (dateValue, locale = "en-US") => {
 		if (!dateValue) return "";
