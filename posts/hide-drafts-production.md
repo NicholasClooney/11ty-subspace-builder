@@ -14,6 +14,7 @@ We now set `ELEVENTY_ENV` for each npm script that ships with Subspace Builder. 
 Need to double-check how the site behaves in production? Use the new `npm run prod` command. It spins up Eleventy’s dev server with the production environment, so you can review the published experience locally while still enjoying hot reloads.
 
 ## What changed
+
 - Eleventy computes `eleventyExcludeFromCollections` using the current `ELEVENTY_ENV`, skipping draft templates whenever the value is `production`.
 - `package.json` scripts now cover the full workflow: `npm run dev` for drafting, `npm run prod` for production previews, and `npm run build` for deployable output.
 - The README calls out the new scripts so the environment-driven behaviour is easy to adopt.

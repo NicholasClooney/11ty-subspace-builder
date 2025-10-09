@@ -13,7 +13,13 @@
   background: var(--gh-bg);
   color: var(--gh-fg);
   box-shadow: 0 1px 0 rgba(27, 31, 36, 0.04);
-  font: 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font:
+    12px/1 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Consolas,
+    'Liberation Mono',
+    monospace;
 }
 
 .gh-embed--dark {
@@ -34,7 +40,16 @@
   align-items: center;
   padding: 0.5rem 0.75rem;
   background: var(--gh-meta-bg);
-  font: 12px/1.4 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  font:
+    12px/1.4 ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Helvetica,
+    Arial,
+    'Apple Color Emoji',
+    'Segoe UI Emoji';
   border-bottom: 1px solid var(--gh-border);
 }
 
@@ -69,11 +84,19 @@
   border: 1px solid var(--gh-border);
   background: rgba(175, 184, 193, 0.12);
   color: inherit;
-  font: 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font:
+    12px/1 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Consolas,
+    'Liberation Mono',
+    monospace;
   padding: 0.25rem 0.65rem;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .gh-embed__copy:hover,

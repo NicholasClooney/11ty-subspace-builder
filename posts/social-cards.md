@@ -46,20 +46,20 @@ for the layout I wanted.
 We planned out a few pieces before typing anything:
 
 1. **Shared excerpt helper.** The site already had an Eleventy `excerpt` filter. To
-stay DRY, we extracted it into `lib/excerpt.js` so both Eleventy and the generator use
-the same logic.
+   stay DRY, we extracted it into `lib/excerpt.js` so both Eleventy and the generator use
+   the same logic.
 2. **Generator script.** A new `scripts/generate-og-images.js` reads every Markdown
-post, renders the markdown with Markdown-It, pulls out the title and excerpt, and feeds
-that into a Satori HTML template. Resvg converts the SVG into a crisp PNG.
+   post, renders the markdown with Markdown-It, pulls out the title and excerpt, and feeds
+   that into a Satori HTML template. Resvg converts the SVG into a crisp PNG.
 3. **Fonts and branding.** We picked Lexend for headings and Inter for body text via
-`@fontsource`. The template applies the Sun theme palette—warm yellow gradient with
-amber accents—to keep the cards on-brand.
+   `@fontsource`. The template applies the Sun theme palette—warm yellow gradient with
+   amber accents—to keep the cards on-brand.
 4. **Caching.** Each post’s title + excerpt + template version hashes into a
-manifest. If nothing changed, we skip regeneration. There’s also a `--force` flag (or
-`OG_FORCE=true`) to nuke the cache when we tweak the design.
+   manifest. If nothing changed, we skip regeneration. There’s also a `--force` flag (or
+   `OG_FORCE=true`) to nuke the cache when we tweak the design.
 5. **Where to store output.** PNGs land in `assets/og/`, and a manifest JSON lives
-under `_data/ogImages.json`. Eleventy treats that as global data we can reference
-later.
+   under `_data/ogImages.json`. Eleventy treats that as global data we can reference
+   later.
 
 ## Adaptive Typography with Satori
 
@@ -87,11 +87,11 @@ setting `OG_FORCE=true` guarantees a full refresh.
 For better dev ergonomics we added:
 
 - `eleventyConfig.addWatchTarget("assets/og/")` and `.cache/og/` so changes to the PNGs
-kick Eleventy’s watcher.
+  kick Eleventy’s watcher.
 - A dedicated npm script (`npm run og`) if I want to regenerate cards without running
-the full site build.
+  the full site build.
 - A friendly `README` section explaining the workflow, including the Satori vs.
-Puppeteer decision.
+  Puppeteer decision.
 
 ## Updating the Head Tags
 
@@ -99,10 +99,10 @@ It turns out you need more than just images. The base Nunjucks layout now assemb
 proper `<head>`:
 
 - Titles combine the post title with the site title (“Post No. 1! · 11ty Subspace
-Builder”).
+  Builder”).
 - Descriptions prefer front matter, then the excerpt, then the site description.
 - Canonical URLs and `og:url`/`twitter:url` derive from the Eleventy `page.url` plus
-the site base.
+  the site base.
 - `og:type` flips to `article` for anything living under `/posts/`.
 - Twitter cards upgrade to `summary_large_image` whenever a PNG exists.
 
@@ -124,10 +124,10 @@ immeasurably.
 Now that social cards are in place, I want to explore:
 
 - Pulling theme colors dynamically from `_data/themes.yaml` so different posts could
-showcase different palettes.
+  showcase different palettes.
 - Generating previews for the home page and tag archives.
 - Surfacing the OG image in the CMS authoring experience so I can preview cards before
-publishing.
+  publishing.
 
 If you’re hacking on 11ty and want branded social previews without a heavy runtime, the
 Satori + Resvg combo is a great place to start—especially if you have GPT-5 Codex in
