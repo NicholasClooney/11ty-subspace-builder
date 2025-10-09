@@ -163,11 +163,11 @@ export default function (eleventyConfig) {
     return path;
   };
 
-	eleventyConfig.addDataExtension("yaml", (contents) => yaml.load(contents));
+  eleventyConfig.addDataExtension('yaml', (contents) => yaml.load(contents));
 
   eleventyConfig.addGlobalData(
-    "environment",
-    process.env.ELEVENTY_ENV || "development"
+    'environment',
+    process.env.ELEVENTY_ENV || 'development',
   );
   eleventyConfig.addGlobalData('eleventyComputed', {
     eleventyExcludeFromCollections(data) {
@@ -175,19 +175,19 @@ export default function (eleventyConfig) {
     },
   });
 
-	eleventyConfig.addPlugin(eleventyNavigationPlugin);
-	eleventyConfig.addPlugin(eleventyImageTransformPlugin, {
-		formats: ["avif", "webp", "jpeg"],
-		widths: [320, 640, 960, 1280],
-		htmlOptions: {
-			imgAttributes: {
-				loading: "lazy",
-				decoding: "async",
-				sizes: "(width <= 30em) 100vw, 75vw",
-			},
-			pictureAttributes: {},
-		},
-	});
+  eleventyConfig.addPlugin(eleventyNavigationPlugin);
+  eleventyConfig.addPlugin(eleventyImageTransformPlugin, {
+    formats: ['avif', 'webp', 'jpeg'],
+    widths: [320, 640, 960, 1280],
+    htmlOptions: {
+      imgAttributes: {
+        loading: 'lazy',
+        decoding: 'async',
+        sizes: '(width <= 30em) 100vw, 75vw',
+      },
+      pictureAttributes: {},
+    },
+  });
 
   // Tell 11ty to use our custom Markdown-it
   eleventyConfig.setLibrary('md', md);
