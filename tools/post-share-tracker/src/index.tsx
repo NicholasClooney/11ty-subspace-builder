@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Box, Text, render, useInput } from "ink";
-import SelectInput from "ink-select-input";
 import {
   SOCIAL_CHANNELS,
   SOCIAL_STATES,
@@ -20,6 +19,92 @@ type SelectItem<Value> = {
   label: string;
   value: Value;
   key?: string;
+};
+
+interface SelectableListProps<Value> {
+  items: SelectItem<Value>[];
+  isActive: boolean;
+  onSelect: (item: SelectItem<Value>) => void | Promise<void>;
+  itemKeyPrefix: string;
+  emptyPlaceholder?: React.ReactNode;
+}
+
+const SelectableList = <Value,>({
+  items,
+  isActive,
+  onSelect,
+  itemKeyPrefix,
+  emptyPlaceholder,
+}: SelectableListProps<Value>) => {
+  const [highlightIndex, setHighlightIndex] = useState(0);
+
+  useEffect(() => {
+    setHighlightIndex((current) => {
+      if (items.length === 0) {
+        return 0;
+      }
+
+      return Math.min(current, items.length - 1);
+    });
+  }, [items]);
+
+  useEffect(() => {
+    if (items.length === 0) {
+      setHighlightIndex(0);
+    }
+  }, [items.length]);
+
+  useInput(
+    (input, key) => {
+      if (items.length === 0) {
+        return;
+      }
+
+      if (key.upArrow || input === "k") {
+        setHighlightIndex((current) => {
+          if (current === 0) {
+            return items.length - 1;
+          }
+
+          return current - 1;
+        });
+        return;
+      }
+
+      if (key.downArrow || input === "j") {
+        setHighlightIndex((current) => (current + 1) % items.length);
+        return;
+      }
+
+      if (key.return) {
+        const item = items[highlightIndex];
+        if (item) {
+          void onSelect(item);
+        }
+      }
+    },
+    { isActive }
+  );
+
+  if (items.length === 0) {
+    return emptyPlaceholder ? <>{emptyPlaceholder}</> : null;
+  }
+
+  return (
+    <Box flexDirection="column">
+      {items.map((item, index) => {
+        const isSelected = index === highlightIndex;
+        return (
+          <Box key={item.key ?? `${itemKeyPrefix}-${index}`}>
+            <Text color={isSelected ? "cyan" : "gray"}>
+              {isSelected ? "› " : "  "}
+            </Text>
+            <Text>{item.label}</Text>
+          </Box>
+        );
+      })}
+    </Box>
+  );
 };
 
 const getStatusColor = (status?: SocialStatus): string => {
@@ -84,14 +169,12 @@ const App: React.FC = () => {
   const [selectedChannel, setSelectedChannel] = useState<SocialChannel | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
   const [postFilter, setPostFilter] = useState("");
 
   const fetchPosts = useCallback(async () => {
     const loaded = await loadPosts();
     setPosts(loaded);
     setLoadError(null);
-    setRefreshKey((key) => key + 1);
     return loaded;
   }, []);
 
@@ -335,15 +418,16 @@ const App: React.FC = () => {
           {postFilter ? (
             <Text color="gray">Filter: “{postFilter}”</Text>
           ) : null}
-          {postItems.length === 0 ? (
-            <Text color="yellow">
-              No posts match the filter. Adjust your search or press Esc to clear.
-            </Text>
-          ) : null}
-          <SelectInput<string>
-            key={`post-${refreshKey}-${postFilter}`}
+          <SelectableList<string>
             items={postItems}
+            isActive={mode === "post" && actionError === null}
             onSelect={handlePostSelect}
+            itemKeyPrefix="post"
+            emptyPlaceholder={
+              <Text color="yellow">
+                No posts match the filter. Adjust your search or press Esc to clear.
+              </Text>
+            }
           />
         </Box>
       );
@@ -358,10 +442,11 @@ const App: React.FC = () => {
           <Text>
             Select a channel to update (Enter). Press Esc to choose a different post.
           </Text>
-          <SelectInput<SocialChannel>
-            key={`channel-${selectedPost.filepath}-${refreshKey}`}
+          <SelectableList<SocialChannel>
             items={channelItems}
+            isActive={mode === "channel" && actionError === null}
             onSelect={handleChannelSelect}
+            itemKeyPrefix={`channel-${selectedPost.filepath}`}
           />
         </Box>
       );
@@ -376,10 +461,11 @@ const App: React.FC = () => {
             <Text color="gray">{formatStatusLabel(currentStatus)}</Text>
           </Text>
           <Text>Select a new status (Enter). Press Esc to reselect the channel.</Text>
-          <SelectInput<SocialState>
-            key={`status-${selectedChannel}-${refreshKey}`}
+          <SelectableList<SocialState>
             items={statusItems}
+            isActive={mode === "status" && actionError === null}
             onSelect={handleStatusSelect}
+            itemKeyPrefix={`status-${selectedChannel}`}
           />
         </Box>
       );
