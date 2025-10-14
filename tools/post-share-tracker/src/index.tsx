@@ -21,6 +21,46 @@ type SelectItem<Value> = {
   key?: string;
 };
 
+const buildChannelSummary = (post: PostMeta): string => {
+  return SOCIAL_CHANNELS.map((channel) => {
+    const status = post.social?.[channel]?.status ?? "—";
+    return `${channel}:${status}`;
+  }).join("  ");
+};
+
+const buildPostLabel = (post: PostMeta): string => {
+  const summary = buildChannelSummary(post);
+  return summary ? `${post.title} — ${summary}` : post.title;
+};
+
+const toFilterTokens = (filter: string): string[] => {
+  return filter
+    .toLowerCase()
+    .split(/\s+/)
+    .map((token) => token.trim())
+    .filter((token) => token.length > 0);
+};
+
+const matchesTokens = (value: string, tokens: string[]): boolean => {
+  if (tokens.length === 0) {
+    return true;
+  }
+
+  const haystack = value.toLowerCase();
+  let searchIndex = 0;
+
+  for (const token of tokens) {
+    const foundIndex = haystack.indexOf(token, searchIndex);
+    if (foundIndex === -1) {
+      return false;
+    }
+
+    searchIndex = foundIndex + token.length;
+  }
+
+  return true;
+};
+
 interface SelectableListProps<Value> {
   items: SelectItem<Value>[];
   isActive: boolean;
@@ -248,35 +288,34 @@ const App: React.FC = () => {
     }
   );
 
+  const filterTokens = useMemo(
+    () => toFilterTokens(postFilter),
+    [postFilter]
+  );
+
   const filteredPosts = useMemo(() => {
-    const trimmedFilter = postFilter.trim().toLowerCase();
-    if (trimmedFilter === "") {
+    if (filterTokens.length === 0) {
       return posts;
     }
 
     return posts.filter((post) => {
+      const summary = buildChannelSummary(post);
       const haystacks = [
         post.title,
         post.slug,
         post.filepath,
+        summary,
         ...SOCIAL_CHANNELS.map((channel) => post.social?.[channel]?.status ?? ""),
-      ]
-        .filter(Boolean)
-        .map((value) => value.toLowerCase());
+      ].filter((value): value is string => Boolean(value));
 
-      return haystacks.some((value) => value.includes(trimmedFilter));
+      return haystacks.some((value) => matchesTokens(value, filterTokens));
     });
-  }, [postFilter, posts]);
+  }, [filterTokens, posts]);
 
   const postItems = useMemo<SelectItem<string>[]>(() => {
     return filteredPosts.map((post) => {
-      const summary = SOCIAL_CHANNELS.map((channel) => {
-        const status = post.social?.[channel]?.status ?? "—";
-        return `${channel}:${status}`;
-      }).join("  ");
-
       return {
-        label: summary ? `${post.title} — ${summary}` : post.title,
+        label: buildPostLabel(post),
         value: post.filepath,
         key: post.filepath,
       };
