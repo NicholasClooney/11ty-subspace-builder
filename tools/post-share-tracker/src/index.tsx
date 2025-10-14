@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Box, Text, render } from "ink";
+import { SOCIAL_CHANNELS } from "./config.js";
 import type { PostMeta, SocialStatus } from "./loadPosts.js";
-import { SOCIAL_PLATFORMS, loadPosts } from "./loadPosts.js";
+import { loadPosts } from "./loadPosts.js";
 
 const TITLE_COLUMN_WIDTH = 40;
 const STATUS_COLUMN_WIDTH = 16;
@@ -37,9 +38,9 @@ const HeaderRow: React.FC = () => (
     <Box width={TITLE_COLUMN_WIDTH}>
       <Text bold>Post</Text>
     </Box>
-    {SOCIAL_PLATFORMS.map((platform) => (
-      <Box key={platform} width={STATUS_COLUMN_WIDTH}>
-        <Text bold>{platform}</Text>
+    {SOCIAL_CHANNELS.map((channel) => (
+      <Box key={channel} width={STATUS_COLUMN_WIDTH}>
+        <Text bold>{channel}</Text>
       </Box>
     ))}
   </Box>
@@ -50,10 +51,10 @@ const PostRow: React.FC<{ post: PostMeta }> = ({ post }) => (
     <Box width={TITLE_COLUMN_WIDTH}>
       <Text>{post.title}</Text>
     </Box>
-    {SOCIAL_PLATFORMS.map((platform) => {
-      const status = post.social?.[platform];
+    {SOCIAL_CHANNELS.map((channel) => {
+      const status = post.social?.[channel];
       return (
-        <Box key={platform} width={STATUS_COLUMN_WIDTH}>
+        <Box key={channel} width={STATUS_COLUMN_WIDTH}>
           <Text color={getStatusColor(status)}>{formatStatusLabel(status)}</Text>
         </Box>
       );
@@ -100,8 +101,8 @@ const App: React.FC = () => {
     <Box flexDirection="column">
       <Text color="cyan">Post Share Tracker</Text>
       <Text>
-        Tracking {posts.length} post{posts.length === 1 ? "" : "s"} across {SOCIAL_PLATFORMS.length} platform
-        {SOCIAL_PLATFORMS.length === 1 ? "" : "s"}.
+        Tracking {posts.length} post{posts.length === 1 ? "" : "s"} across {SOCIAL_CHANNELS.length} channel
+        {SOCIAL_CHANNELS.length === 1 ? "" : "s"}.
       </Text>
       <Box marginTop={1} flexDirection="column">
         <HeaderRow />

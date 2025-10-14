@@ -3,11 +3,7 @@ import matter from "gray-matter";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-
-export const SOCIAL_PLATFORMS = ["twitter", "linkedin", "mastodon"] as const;
-
-export type SocialPlatform = (typeof SOCIAL_PLATFORMS)[number];
-export type SocialState = "queued" | "shared" | "draft";
+import { SOCIAL_CHANNELS, SOCIAL_STATES, SocialChannel, SocialState } from "./config.js";
 
 export interface SocialStatus {
   status: SocialState;
@@ -19,7 +15,7 @@ export interface PostMeta {
   slug: string;
   title: string;
   filepath: string;
-  social?: Partial<Record<SocialPlatform, SocialStatus>>;
+  social?: Partial<Record<SocialChannel, SocialStatus>>;
 }
 
 const repoRoot = fileURLToPath(new URL("../../..", import.meta.url));
@@ -35,7 +31,7 @@ const parseSocialStatus = (value: unknown): SocialStatus | undefined => {
   }
 
   const status = value.status;
-  if (status !== "queued" && status !== "shared" && status !== "draft") {
+  if (typeof status !== "string" || !SOCIAL_STATES.includes(status as SocialState)) {
     return undefined;
   }
 
@@ -66,10 +62,10 @@ export const loadPosts = async (): Promise<PostMeta[]> => {
 
       let social: PostMeta["social"];
       if (isRecord(data.social)) {
-        const entries = SOCIAL_PLATFORMS.map((platform) => {
-          const parsed = parseSocialStatus(data.social?.[platform]);
-          return parsed ? [platform, parsed] : undefined;
-        }).filter((entry): entry is [SocialPlatform, SocialStatus] => Boolean(entry));
+        const entries = SOCIAL_CHANNELS.map((channel) => {
+          const parsed = parseSocialStatus(data.social?.[channel]);
+          return parsed ? [channel, parsed] : undefined;
+        }).filter((entry): entry is [SocialChannel, SocialStatus] => Boolean(entry));
 
         if (entries.length > 0) {
           social = Object.fromEntries(entries) as PostMeta["social"];

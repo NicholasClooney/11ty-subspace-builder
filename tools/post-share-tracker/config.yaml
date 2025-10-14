@@ -1,0 +1,9 @@
+social:
+  channels:
+    - mastodon
+    - linkedin-post
+    - linkedin-article
+  states:
+    - queued
+    - shared
+    - draft
