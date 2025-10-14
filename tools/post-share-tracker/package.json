@@ -8,7 +8,7 @@
     "post-share-tracker": "dist/index.js"
   },
   "scripts": {
-    "start": "ts-node --esm src/index.tsx",
+    "start": "tsx src/index.tsx",
     "build": "tsc",
     "format": "prettier --write \"src/**/*.{ts,tsx}\""
   },
@@ -23,6 +23,7 @@
     "@types/node": "^20.14.10",
     "@types/react": "^18.3.3",
     "ts-node": "^10.9.2",
+    "tsx": "^4.16.2",
     "typescript": "^5.5.4"
   }
 }
