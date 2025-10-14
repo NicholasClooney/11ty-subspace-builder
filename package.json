@@ -1,6 +1,10 @@
 {
   "name": "11ty-subspace-builder",
   "version": "1.7.0",
+  "private": true,
+  "workspaces": [
+    "tools/*"
+  ],
   "description": "",
   "main": "index.js",
   "scripts": {
