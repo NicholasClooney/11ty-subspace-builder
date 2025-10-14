@@ -85,6 +85,7 @@ const App: React.FC = () => {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [postFilter, setPostFilter] = useState("");
 
   const fetchPosts = useCallback(async () => {
     const loaded = await loadPosts();
@@ -122,10 +123,14 @@ const App: React.FC = () => {
   }, [selectedPostPath, selectedPost]);
 
   useInput(
-    (_, key) => {
+    (input, key) => {
       if (key.escape) {
         setActionError(null);
         setStatusMessage(null);
+        if (mode === "post" && postFilter.length > 0) {
+          setPostFilter("");
+          return;
+        }
         if (mode === "status") {
           setMode("channel");
           setSelectedChannel(null);
@@ -138,6 +143,21 @@ const App: React.FC = () => {
           setSelectedChannel(null);
         }
       }
+
+      if (mode === "post") {
+        if ((key.backspace || key.delete) && postFilter.length > 0) {
+          setPostFilter((current) => current.slice(0, -1));
+          return;
+        }
+
+        const isModifierPressed = key.ctrl || key.meta;
+        const isNavigationKey =
+          key.return || key.upArrow || key.downArrow || key.leftArrow || key.rightArrow || key.pageDown || key.pageUp || key.tab;
+
+        if (!isModifierPressed && !isNavigationKey && input && input >= " ") {
+          setPostFilter((current) => `${current}${input}`);
+        }
+      }
     },
     {
       isActive:
@@ -145,8 +165,28 @@ const App: React.FC = () => {
     }
   );
 
+  const filteredPosts = useMemo(() => {
+    const trimmedFilter = postFilter.trim().toLowerCase();
+    if (trimmedFilter === "") {
+      return posts;
+    }
+
+    return posts.filter((post) => {
+      const haystacks = [
+        post.title,
+        post.slug,
+        post.filepath,
+        ...SOCIAL_CHANNELS.map((channel) => post.social?.[channel]?.status ?? ""),
+      ]
+        .filter(Boolean)
+        .map((value) => value.toLowerCase());
+
+      return haystacks.some((value) => value.includes(trimmedFilter));
+    });
+  }, [postFilter, posts]);
+
   const postItems = useMemo<SelectItem<string>[]>(() => {
-    return posts.map((post) => {
+    return filteredPosts.map((post) => {
       const summary = SOCIAL_CHANNELS.map((channel) => {
         const status = post.social?.[channel]?.status ?? "—";
         return `${channel}:${status}`;
@@ -158,7 +198,7 @@ const App: React.FC = () => {
         key: post.filepath,
       };
     });
-  }, [posts]);
+  }, [filteredPosts]);
 
   const channelItems = useMemo<SelectItem<SocialChannel>[]>(() => {
     if (!selectedPost) {
@@ -195,6 +235,7 @@ const App: React.FC = () => {
     setMode("channel");
     setStatusMessage(null);
     setActionError(null);
+    setPostFilter("");
   };
 
   const handleChannelSelect = (item: SelectItem<SocialChannel>) => {
@@ -288,8 +329,19 @@ const App: React.FC = () => {
       return (
         <Box flexDirection="column">
           <Text>Select a post to update (Enter).</Text>
+          <Text color="gray">
+            Type to filter by title/slug. Backspace edits. Esc clears the filter.
+          </Text>
+          {postFilter ? (
+            <Text color="gray">Filter: “{postFilter}”</Text>
+          ) : null}
+          {postItems.length === 0 ? (
+            <Text color="yellow">
+              No posts match the filter. Adjust your search or press Esc to clear.
+            </Text>
+          ) : null}
           <SelectInput<string>
-            key={`post-${refreshKey}`}
+            key={`post-${refreshKey}-${postFilter}`}
             items={postItems}
             onSelect={handlePostSelect}
           />

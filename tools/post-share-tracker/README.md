@@ -19,8 +19,9 @@ npm run --workspace post-share-tracker start
 ```
 
 The app loads blog posts, prints a channel/status table, and lets you interactively update frontmatter:
+- Type to filter the post list; `Backspace` edits, `Esc` clears the filter.
 - Use the first prompt to choose a post, then pick a channel and status.
-- Press `Esc` to step back (channel → post) or change your selection.
+- Press `Esc` to step back (status → channel → post) or change your selection.
 - Selecting a new status writes the update to disk (auto-timestamping `shared` statuses) and refreshes the table.
 
 ## Configuration
