@@ -4,6 +4,6 @@ social:
     - linkedin-post
     - linkedin-article
   states:
-    - queued
     - shared
+    - queued
     - draft

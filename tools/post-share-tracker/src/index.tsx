@@ -12,6 +12,7 @@ import { savePostSocial } from "./savePostSocial.js";
 
 const TITLE_COLUMN_WIDTH = 40;
 const STATUS_COLUMN_WIDTH = 18;
+const POINTER_COLUMN_WIDTH = 2;
 
 type Mode = "post" | "channel" | "status" | "saving";
 
@@ -67,6 +68,7 @@ interface SelectableListProps<Value> {
   onSelect: (item: SelectItem<Value>) => void | Promise<void>;
   itemKeyPrefix: string;
   emptyPlaceholder?: React.ReactNode;
+  renderItem?: (item: SelectItem<Value>, isSelected: boolean) => React.ReactNode;
 }
 
 const SelectableList = <Value,>({
@@ -75,6 +77,7 @@ const SelectableList = <Value,>({
   onSelect,
   itemKeyPrefix,
   emptyPlaceholder,
+  renderItem,
 }: SelectableListProps<Value>) => {
   const [highlightIndex, setHighlightIndex] = useState(0);
 
@@ -134,12 +137,19 @@ const SelectableList = <Value,>({
     <Box flexDirection="column">
       {items.map((item, index) => {
         const isSelected = index === highlightIndex;
+        const pointerColor = isSelected ? "cyan" : "gray";
         return (
-          <Box key={item.key ?? `${itemKeyPrefix}-${index}`}>
-            <Text color={isSelected ? "cyan" : "gray"}>
-              {isSelected ? "› " : "  "}
-            </Text>
-            <Text>{item.label}</Text>
+          <Box key={item.key ?? `${itemKeyPrefix}-${index}`} flexDirection="row">
+            <Box width={POINTER_COLUMN_WIDTH}>
+              <Text color={pointerColor}>{isSelected ? "›" : " "}</Text>
+            </Box>
+            <Box flexGrow={1}>
+              {renderItem ? (
+                renderItem(item, isSelected)
+              ) : (
+                <Text color={isSelected ? "cyan" : undefined}>{item.label}</Text>
+              )}
+            </Box>
           </Box>
         );
       })}
@@ -184,10 +194,13 @@ const HeaderRow: React.FC = () => (
   </Box>
 );
 
-const PostRow: React.FC<{ post: PostMeta }> = ({ post }) => (
+const PostRow: React.FC<{ post: PostMeta; isSelected?: boolean }> = ({
+  post,
+  isSelected = false,
+}) => (
   <Box>
     <Box width={TITLE_COLUMN_WIDTH}>
-      <Text>{post.title}</Text>
+      <Text color={isSelected ? "cyan" : undefined}>{post.title}</Text>
     </Box>
     {SOCIAL_CHANNELS.map((channel) => {
       const status = post.social?.[channel];
@@ -311,6 +324,14 @@ const App: React.FC = () => {
       return haystacks.some((value) => matchesTokens(value, filterTokens));
     });
   }, [filterTokens, posts]);
+
+  const postsByPath = useMemo(() => {
+    const map = new Map<string, PostMeta>();
+    filteredPosts.forEach((post) => {
+      map.set(post.filepath, post);
+    });
+    return map;
+  }, [filteredPosts]);
 
   const postItems = useMemo<SelectItem<string>[]>(() => {
     return filteredPosts.map((post) => {
@@ -457,17 +478,31 @@ const App: React.FC = () => {
           {postFilter ? (
             <Text color="gray">Filter: “{postFilter}”</Text>
           ) : null}
-          <SelectableList<string>
-            items={postItems}
-            isActive={mode === "post" && actionError === null}
-            onSelect={handlePostSelect}
-            itemKeyPrefix="post"
-            emptyPlaceholder={
-              <Text color="yellow">
-                No posts match the filter. Adjust your search or press Esc to clear.
-              </Text>
-            }
-          />
+          <Box marginTop={1} flexDirection="column">
+            <Box flexDirection="row">
+              <Box width={POINTER_COLUMN_WIDTH} />
+              <HeaderRow />
+            </Box>
+            <SelectableList<string>
+              items={postItems}
+              isActive={mode === "post" && actionError === null}
+              onSelect={handlePostSelect}
+              itemKeyPrefix="post"
+              emptyPlaceholder={
+                <Text color="yellow">
+                  No posts match the filter. Adjust your search or press Esc to clear.
+                </Text>
+              }
+              renderItem={(item, isSelected) => {
+                const postForRow = postsByPath.get(item.value);
+                if (!postForRow) {
+                  return <Text color={isSelected ? "cyan" : undefined}>{item.label}</Text>;
+                }
+
+                return <PostRow post={postForRow} isSelected={isSelected} />;
+              }}
+            />
+          </Box>
         </Box>
       );
     }
@@ -481,12 +516,38 @@ const App: React.FC = () => {
           <Text>
             Select a channel to update (Enter). Press Esc to choose a different post.
           </Text>
-          <SelectableList<SocialChannel>
-            items={channelItems}
-            isActive={mode === "channel" && actionError === null}
-            onSelect={handleChannelSelect}
-            itemKeyPrefix={`channel-${selectedPost.filepath}`}
-          />
+          <Box marginTop={1} flexDirection="column">
+            <Box flexDirection="row">
+              <Box width={POINTER_COLUMN_WIDTH} />
+              <Box width={STATUS_COLUMN_WIDTH}>
+                <Text bold>Channel</Text>
+              </Box>
+              <Box width={STATUS_COLUMN_WIDTH}>
+                <Text bold>Status</Text>
+              </Box>
+            </Box>
+            <SelectableList<SocialChannel>
+              items={channelItems}
+              isActive={mode === "channel" && actionError === null}
+              onSelect={handleChannelSelect}
+              itemKeyPrefix={`channel-${selectedPost.filepath}`}
+              renderItem={(item, isSelected) => {
+                const status = selectedPost.social?.[item.value];
+                return (
+                  <Box flexDirection="row">
+                    <Box width={STATUS_COLUMN_WIDTH}>
+                      <Text color={isSelected ? "cyan" : undefined}>{item.value}</Text>
+                    </Box>
+                    <Box width={STATUS_COLUMN_WIDTH}>
+                      <Text color={getStatusColor(status)}>
+                        {formatStatusLabel(status)}
+                      </Text>
+                    </Box>
+                  </Box>
+                );
+              }}
+            />
+          </Box>
         </Box>
       );
     }
@@ -500,12 +561,38 @@ const App: React.FC = () => {
             <Text color="gray">{formatStatusLabel(currentStatus)}</Text>
           </Text>
           <Text>Select a new status (Enter). Press Esc to reselect the channel.</Text>
-          <SelectableList<SocialState>
-            items={statusItems}
-            isActive={mode === "status" && actionError === null}
-            onSelect={handleStatusSelect}
-            itemKeyPrefix={`status-${selectedChannel}`}
-          />
+          <Box marginTop={1} flexDirection="column">
+            <Box flexDirection="row">
+              <Box width={POINTER_COLUMN_WIDTH} />
+              <Box width={STATUS_COLUMN_WIDTH}>
+                <Text bold>Status</Text>
+              </Box>
+              <Box width={TITLE_COLUMN_WIDTH}>
+                <Text bold>Details</Text>
+              </Box>
+            </Box>
+            <SelectableList<SocialState>
+              items={statusItems}
+              isActive={mode === "status" && actionError === null}
+              onSelect={handleStatusSelect}
+              itemKeyPrefix={`status-${selectedChannel}`}
+              renderItem={(item, isSelected) => {
+                const isCurrent = item.value === currentStatus?.status;
+                return (
+                  <Box flexDirection="row">
+                    <Box width={STATUS_COLUMN_WIDTH}>
+                      <Text color={isSelected ? "cyan" : undefined}>{item.value}</Text>
+                    </Box>
+                    <Box width={TITLE_COLUMN_WIDTH}>
+                      <Text color={isCurrent ? "green" : "gray"}>
+                        {isCurrent ? "Already current status" : "Set channel to this state"}
+                      </Text>
+                    </Box>
+                  </Box>
+                );
+              }}
+            />
+          </Box>
         </Box>
       );
     }
@@ -520,12 +607,6 @@ const App: React.FC = () => {
         Tracking {posts.length} post{posts.length === 1 ? "" : "s"} across{" "}
         {SOCIAL_CHANNELS.length} channel{SOCIAL_CHANNELS.length === 1 ? "" : "s"}.
       </Text>
-      <Box marginTop={1} flexDirection="column">
-        <HeaderRow />
-        {posts.map((post) => (
-          <PostRow key={post.filepath} post={post} />
-        ))}
-      </Box>
       <Box marginTop={1} flexDirection="column">
         {statusMessage && <Text color="green">{statusMessage}</Text>}
         {actionError && <Text color="red">{actionError}</Text>}
