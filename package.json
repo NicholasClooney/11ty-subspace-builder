@@ -14,7 +14,8 @@
     "format": "prettier --write \"**/*.{js,css,md}\"",
     "test": "echo \"Error: no test specified\" && exit 1",
     "fix-lfs": "git lfs fetch upstream --all && git lfs push origin --all && git lfs pull",
-    "og": "node ./scripts/generate-og-images.js"
+    "og": "node ./scripts/generate-og-images.js",
+    "tracker-list": "npm run --workspace post-share-tracker start"
   },
   "keywords": [],
   "author": "",
