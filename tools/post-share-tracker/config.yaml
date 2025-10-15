@@ -2,6 +2,7 @@ social:
   channels:
     - reddit
     - mastodon
+    - substack
     - linkedin-post
     - linkedin-article
   states:
