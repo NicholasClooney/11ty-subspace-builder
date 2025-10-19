@@ -1,6 +1,11 @@
 ---
 title: Lighting Up GitHub Embeds in My Eleventy Blog
 date: 2025-10-03
+tags:
+  - eleventy
+  - github
+  - shortcodes
+  - code-embeds
 eleventyNavigation:
   key: github-embeds
 ---

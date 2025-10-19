@@ -1,6 +1,10 @@
 ---
 title: Preview production drafts locally
 date: 2025-09-28
+tags:
+  - eleventy
+  - drafts
+  - workflow
 eleventyNavigation:
   key: hide-drafts-production
 excerpt: |

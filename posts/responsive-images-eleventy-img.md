@@ -1,6 +1,10 @@
 ---
 title: Leveling Up Responsive Images with Eleventy Img
 date: 2025-09-27
+tags:
+  - eleventy
+  - performance
+  - responsive-images
 eleventyNavigation:
   key: responsive-images-eleventy-img
 excerpt: |

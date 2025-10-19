@@ -1,6 +1,10 @@
 ---
 title: Draft Workflow Demo
 date: 2025-09-28
+tags:
+  - eleventy
+  - drafts
+  - workflow
 draft: true
 excerpt: |
   Quick sanity check that the new draft pipeline hides unfinished posts when Eleventy runs in production mode.

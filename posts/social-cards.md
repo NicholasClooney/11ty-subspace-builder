@@ -1,6 +1,10 @@
 ---
 title: Shipping Social Cards with Satori (and GPT-5 Codex)
 date: 2025-09-26
+tags:
+  - eleventy
+  - og-images
+  - automation
 eleventyNavigation:
   key: social-cards
 ---
