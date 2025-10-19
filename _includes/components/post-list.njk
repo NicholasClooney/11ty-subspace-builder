@@ -12,6 +12,18 @@
               <time datetime="{{ item.date | machineDate }}">{{ item.date | readableDate }}</time>
             </p>
           {% endif %}
+          {% set itemTags = (item.data.tags | default([])) | filterTags %}
+          {% if itemTags | length %}
+            <ul class="list pl0 ma0 mb3 flex flex-wrap">
+              {% for tag in itemTags %}
+                <li class="mr2 mb2">
+                  <a class="link dim f6 theme-midtone ba b--black-20 br-pill ph2 pv1" href="/tags/{{ tag | slug }}/">
+                    #{{ tag }}
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
           <div class="lh-copy">
             {% if item.data.excerpt %}
               {{ item.data.excerpt | safe }}

@@ -321,6 +321,8 @@ export default function (eleventyConfig) {
     }
   });
 
+  eleventyConfig.addFilter('filterTags', filterTagList);
+
   eleventyConfig.addFilter('slug', (value) => {
     if (!value) return '';
     return slugify(value);
