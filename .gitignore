@@ -246,6 +246,10 @@ Sessionx.vim
 .netrwhist
 # Auto-generated tag files
 tags
+
+# Keep Eleventy tag templates directory tracked
+!tags/
+!tags/**
 # Persistent undo
 [._]*.un~
 

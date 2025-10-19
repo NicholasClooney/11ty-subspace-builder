@@ -1,0 +1,26 @@
+---
+layout: layouts/home.njk
+title: Tags
+permalink: /tags/
+showPostHeader: false
+---
+
+{% set tagList = collections.tagList or [] %}
+
+<h1 class="f2 lh-title">Tags</h1>
+
+{% if tagList | length %}
+  <ul class="list pl0">
+    {% for tag in tagList %}
+      {% set posts = collections[tag] or [] %}
+      <li class="mv2">
+        <a href="/tags/{{ tag | slug }}/" class="link dim">
+          #{{ tag }}
+        </a>
+        <small class="gray">({{ posts | length }})</small>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p class="mid-gray">No tags yet. Add tags to your posts to see them listed here.</p>
+{% endif %}

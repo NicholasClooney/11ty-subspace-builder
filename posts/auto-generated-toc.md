@@ -1,6 +1,11 @@
 ---
 title: Auto-Generated TOCs Land in Subspace Builder
 date: 2025-09-27
+tags:
+  - eleventy
+  - markdown
+  - table-of-contents
+  - automation
 eleventyNavigation:
   key: auto-generated-toc
 excerpt: |

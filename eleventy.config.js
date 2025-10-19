@@ -119,7 +119,14 @@ const guessLanguageByExt = (filePath) => {
 };
 
 const slugify = (value) =>
-  encodeURIComponent(String(value).trim().toLowerCase().replace(/\s+/g, '-'));
+  String(value)
+    .trim()
+    .toLowerCase()
+    .replace(/['’]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+const TAG_IGNORE = new Set(['all', 'nav', 'post', 'posts']);
 
 const md = new MarkdownIt({ html: true, linkify: true })
   .use(MarkdownItAnchor, {
@@ -181,6 +188,33 @@ export default function (eleventyConfig) {
       if (!title || !draft) return title;
       return title.startsWith(prefix) ? title : `${prefix}${title}`;
     },
+    displayTags(data) {
+      const tags = Array.isArray(data?.tags) ? data.tags : [];
+      return tags
+        .map((tag) => {
+          const name = String(tag).trim();
+          if (!name) return null;
+          if (TAG_IGNORE.has(name.toLowerCase())) return null;
+          return { name, slug: slugify(name) };
+        })
+        .filter(Boolean);
+    },
+  });
+
+  eleventyConfig.addCollection('tagList', (collectionApi) => {
+    const tagSet = new Set();
+    collectionApi.getAll().forEach((item) => {
+      const tags = item?.data?.tags || [];
+      tags.forEach((tag) => {
+        const name = String(tag).trim();
+        if (!name) return;
+        if (TAG_IGNORE.has(name.toLowerCase())) return;
+        tagSet.add(name);
+      });
+    });
+    return [...tagSet].sort((a, b) =>
+      a.localeCompare(b, 'en', { sensitivity: 'base' }),
+    );
   });
 
   eleventyConfig.addPlugin(eleventyNavigationPlugin);
@@ -290,6 +324,7 @@ export default function (eleventyConfig) {
   });
 
   eleventyConfig.addFilter('excerpt', excerpt);
+  eleventyConfig.addFilter('slug', slugify);
 
   eleventyConfig.addFilter('absoluteUrl', (path, base = '') => {
     if (!path) return '';

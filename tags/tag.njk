@@ -1,0 +1,39 @@
+---
+layout: layouts/home.njk
+pagination:
+  data: collections.tagList
+  size: 1
+  alias: tag
+permalink: /tags/{{ tag | slug }}/
+showPostHeader: false
+eleventyComputed:
+  title: "Posts tagged '{{ tag }}'"
+---
+
+{% set posts = (collections[tag] or []) | reverse %}
+
+<h1 class="f2 lh-title">Posts tagged &ldquo;{{ tag }}&rdquo;</h1>
+
+{% if posts | length %}
+  <ul class="list pl0">
+    {% for post in posts %}
+      <li class="mv3">
+        <a href="{{ post.url }}" class="link dim">
+          {{ post.data.title }}
+        </a>
+        {% if post.date %}
+          <div class="silver f6">
+            <time datetime="{{ post.date | machineDate }}">{{ post.date | readableDate }}</time>
+          </div>
+        {% endif %}
+        {% if post.data.description %}
+          <div class="mid-gray mt1">
+            {{ post.data.description }}
+          </div>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p class="mid-gray">No posts found for this tag yet.</p>
+{% endif %}

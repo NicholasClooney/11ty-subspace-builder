@@ -188,11 +188,20 @@ layout: layouts/base.njk
       <heading-anchors>
         {{ content | safe }}
       </heading-anchors>
+      {% set displayableTags = displayTags or [] %}
+      {% if displayableTags | length %}
+        <div class="mt4">
+          <span class="silver f6">Tags:</span>
+          {% for tag in displayableTags %}
+            <a class="ba b--black-10 br2 ph2 pv1 mh1 no-underline mid-gray hover-black" href="/tags/{{ tag.slug }}/">#{{ tag.name }}</a>
+          {% endfor %}
+        </div>
+      {% endif %}
       {% if page.url and page.url.indexOf('/posts/') == 0 and giscusConfig.repo %}
         <script src="https://giscus.app/client.js"
                 data-repo="{{ giscusConfig.repo }}"
-                data-repo-id="{{ giscusConfig.repoId }}"
-                data-category="{{ giscusConfig.category }}"
+            data-repo-id="{{ giscusConfig.repoId }}"
+            data-category="{{ giscusConfig.category }}"
                 data-category-id="{{ giscusConfig.categoryId }}"
                 data-mapping="{{ giscusConfig.mapping | default('pathname') }}"
                 data-strict="0"

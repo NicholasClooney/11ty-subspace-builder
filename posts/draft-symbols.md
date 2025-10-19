@@ -1,6 +1,10 @@
 ---
 title: "\"Symbols & Testing\" <Draft #1>"
 date: 2025-10-20
+tags:
+  - drafts
+  - testing
+  - social-sharing
 draft: true
 excerpt: |
   Checking whether quotes ("), ampersands (&), and angle brackets (< >) stay readable inside our social previews.
