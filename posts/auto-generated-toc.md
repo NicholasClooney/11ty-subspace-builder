@@ -3,6 +3,7 @@ title: Auto-Generated TOCs Land in Subspace Builder
 date: 2025-09-27
 tags:
   - eleventy
+  - automation
   - markdown
   - table-of-contents
 eleventyNavigation:
