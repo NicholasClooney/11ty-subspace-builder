@@ -165,6 +165,12 @@ export default function (eleventyConfig) {
     return path;
   };
 
+  const excludedTags = new Set(['all', 'nav', 'post', 'posts']);
+  const filterTagList = (tags = []) =>
+    (Array.isArray(tags) ? tags : [tags])
+      .map((tag) => (typeof tag === 'string' ? tag : null))
+      .filter((tag) => tag && !excludedTags.has(tag));
+
   eleventyConfig.addDataExtension('yaml', (contents) => yaml.load(contents));
 
   eleventyConfig.addGlobalData(
@@ -203,6 +209,20 @@ export default function (eleventyConfig) {
 
   // Copy static assets straight through to the build output
   eleventyConfig.addPassthroughCopy('assets');
+
+  eleventyConfig.addCollection('tagList', (collectionApi) => {
+    const tagSet = new Set();
+    for (const item of collectionApi.getAllSorted()) {
+      const tags = item?.data?.tags;
+      if (!tags) continue;
+      for (const tag of filterTagList(tags)) {
+        tagSet.add(tag);
+      }
+    }
+    return Array.from(tagSet).sort((first, second) =>
+      first.localeCompare(second, undefined, { sensitivity: 'base' }),
+    );
+  });
 
   eleventyConfig.addAsyncShortcode(
     'github',
@@ -299,6 +319,11 @@ export default function (eleventyConfig) {
     } catch (error) {
       return path;
     }
+  });
+
+  eleventyConfig.addFilter('slug', (value) => {
+    if (!value) return '';
+    return slugify(value);
   });
 
   eleventyConfig.on('eleventy.after', ({ results = [] } = {}) => {
